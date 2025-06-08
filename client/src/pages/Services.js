@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Container,
@@ -7,35 +7,54 @@ import {
   CardContent,
   CardHeader,
   TextField,
-  CardMedia,
-  Box,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
-
-// --- local images ---
-import plumbingImg   from '/Users/thispc/Documents/React/Boiler-FIxIt/Boiler-Fixit/client/src/Images/Plumbing.jpg';
-import bicyleImg     from '/Users/thispc/Documents/React/Boiler-FIxIt/Boiler-Fixit/client/src/Images/Bicycle.jpg';
-import electronicsImg from '/Users/thispc/Documents/React/Boiler-FIxIt/Boiler-Fixit/client/src/Images/Electronics.jpg';
-import furnitureImg  from '/Users/thispc/Documents/React/Boiler-FIxIt/Boiler-Fixit/client/src/Images/Furniture.jpg';
-import haircutImg    from '/Users/thispc/Documents/React/Boiler-FIxIt/Boiler-Fixit/client/src/Images/Haircut.jpg';
-import technicalImg  from '/Users/thispc/Documents/React/Boiler-FIxIt/Boiler-Fixit/client/src/Images/Technical.jpg';
+import { getServices } from '../services/api';
 
 const Services = () => {
-  const services = [
-    { title: 'Plumbing Repairs',   description: 'Fix leaks, unclog drains, and more',            image: plumbingImg },
-    { title: 'Bicycle Maintenance', description: 'Tune-ups, repairs, and parts replacement',     image: bicyleImg   },
-    { title: 'Electronics Repair',  description: 'Computer, phone, and device repairs',          image: electronicsImg },
-    { title: 'Furniture Assembly',  description: 'Assembly and repair of furniture',             image: furnitureImg },
-    { title: 'Haircut',             description: 'Professional haircuts and styling services',   image: haircutImg   },
-    { title: 'Technical Help',      description: 'Software troubleshooting and technical support', image: technicalImg },
-  ];
-
+  const [services, setServices] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const data = await getServices();
+        setServices(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load services. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   const filteredServices = services.filter(
     (service) =>
       service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       service.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <Container sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container sx={{ mt: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg">
@@ -52,7 +71,6 @@ const Services = () => {
         sx={{ mb: 4 }}
       />
 
-      {/*  ►►  updated Grid  ◄◄ */}
       <Grid container spacing={4} alignItems="stretch">
         {filteredServices.map((service, index) => (
           <Grid
@@ -60,14 +78,14 @@ const Services = () => {
             xs={12}
             sm={6}
             md={4}
-            key={index}
-            sx={{ display: 'flex' }}            // let the card stretch
+            key={service.id || index}
+            sx={{ display: 'flex' }}
           >
             <Card
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                height: '100%',                // fill the entire grid cell
+                height: '100%',
                 width: '100%',
                 transition: 'transform 0.2s ease-in-out',
                 '&:hover': {
@@ -76,21 +94,6 @@ const Services = () => {
                 },
               }}
             >
-              <Box sx={{ position: 'relative', paddingTop: '66.67%' /* 3:2 ratio */ }}>
-                <CardMedia
-                  component="img"
-                  image={service.image}
-                  alt={service.title}
-                  sx={{
-                    position: 'absolute',
-                    inset: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                />
-              </Box>
-
               <CardHeader
                 title={service.title}
                 sx={{
@@ -100,14 +103,12 @@ const Services = () => {
                   '& .MuiCardHeader-title': { fontSize: '1.25rem', fontWeight: 'bold' },
                 }}
               />
-
               <CardContent
                 sx={{
                   flexGrow: 1,
                   display: 'flex',
                   alignItems: 'center',
                   p: 2,
-                  height: '80px',               // fixed description height
                 }}
               >
                 <Typography variant="body1">{service.description}</Typography>
