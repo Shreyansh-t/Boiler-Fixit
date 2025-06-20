@@ -10,7 +10,7 @@ import {
   Box,
   Link,
 } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();

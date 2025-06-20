@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography, Container, Box, Button, Grid, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Home = () => {
   const navigate = useNavigate();

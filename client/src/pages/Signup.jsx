@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -9,19 +9,35 @@ import {
   Button,
   Box,
   Link,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Signup = () => {
   const { register, handleSubmit, formState: { errors }, watch } = useForm();
-  const { signup } = useAuth();
+  const { signup, loading, error: authError } = useAuth();
   const navigate = useNavigate();
   const password = watch('password');
+  const [error, setError] = useState('');
 
   const onSubmit = async (data) => {
-    const result = await signup(data);
-    if (result.success) {
-      navigate('/');
+    try {
+      console.log('Submitting signup form with data:', { ...data, password: '[REDACTED]' });
+      setError('');
+      const result = await signup(data);
+      console.log('Signup result:', result);
+      
+      if (result.success) {
+        console.log('Signup successful, navigating to home');
+        navigate('/');
+      } else {
+        console.error('Signup failed:', result.error);
+        setError(result.error || 'Failed to create account');
+      }
+    } catch (err) {
+      console.error('Error during signup:', err);
+      setError(err.message || 'An unexpected error occurred');
     }
   };
 
@@ -32,7 +48,12 @@ const Signup = () => {
           <Typography variant="h4" component="h1" gutterBottom align="center" color="primary">
             Create an Account
           </Typography>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          {(error || authError) && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error || authError}
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <TextField
               fullWidth
               label="Full Name"
@@ -42,6 +63,7 @@ const Signup = () => {
               })}
               error={!!errors.fullName}
               helperText={errors.fullName?.message}
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -57,6 +79,7 @@ const Signup = () => {
               })}
               error={!!errors.email}
               helperText={errors.email?.message}
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -72,6 +95,7 @@ const Signup = () => {
               })}
               error={!!errors.password}
               helperText={errors.password?.message}
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -85,6 +109,7 @@ const Signup = () => {
               })}
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword?.message}
+              disabled={loading}
             />
             <Button
               type="submit"
@@ -93,8 +118,9 @@ const Signup = () => {
               color="primary"
               size="large"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
-              Sign Up
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link
@@ -102,6 +128,7 @@ const Signup = () => {
                 variant="body2"
                 onClick={() => navigate('/login')}
                 sx={{ textDecoration: 'none' }}
+                disabled={loading}
               >
                 Already have an account? Login
               </Link>
