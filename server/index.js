@@ -4,6 +4,7 @@ const path = require("path");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const userRouter = require("./src/routes/user.routes");
+const otpRouter = require("./src/routes/otp.routes");
 const app = express();
 
 // Middleware
@@ -23,7 +24,7 @@ app.use((req, res, next) => {
 // API Routes
 
 app.use('/user', userRouter);
-
+app.use('/otp', otpRouter);
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "../client/build")));
 
