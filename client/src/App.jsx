@@ -9,6 +9,8 @@ import Signup from './pages/Signup.jsx';
 import EmailVerification from './pages/EmailVerification.jsx';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
 import UserContextProvider from './contexts/userContext.jsx';
+import ServiceDetail from './pages/ServiceDetail.jsx';
+import Cart from './pages/Cart.jsx';
 import './App.css';
 
 // Create a theme instance
@@ -120,6 +122,8 @@ function App() {
                 <Route path="email-verification" element={<EmailVerification />} />
                 <Route path="signup" element={<Signup />} />
                 <Route path="/services" element={<Services />} />
+                <Route path="/services/:id" element={<ServiceDetail />} />
+                <Route path="/cart" element={<Cart />} />
               </Route>
             </Routes>
           </BrowserRouter>

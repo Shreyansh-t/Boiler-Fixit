@@ -9,14 +9,29 @@ import {
   TextField,
   CircularProgress,
   Alert,
+  Button,
+  IconButton,
+  Badge,
+  Box,
+  Snackbar,
+  Drawer
 } from '@mui/material';
 import { getServices } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Services = () => {
   const [services, setServices] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [desc, setDesc] = useState('');
+  const [selectedService, setSelectedService] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -40,6 +55,37 @@ const Services = () => {
       (service.description && service.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const isInCart = (id) => cart.some((item) => item._id === id);
+
+  const handleAdd = (service) => {
+    setSelectedService(service);
+    setDesc('');
+    setDrawerOpen(true);
+  };
+
+  const handleSaveDesc = () => {
+    if (selectedService && !isInCart(selectedService._id)) {
+      setCart([...cart, { ...selectedService, desc }]);
+    }
+    setDrawerOpen(false);
+    setSelectedService(null);
+    setDesc('');
+  };
+
+  const handleRemove = (id) => {
+    setCart(cart.filter((item) => item._id !== id));
+  };
+
+  const handleCartClick = () => {
+    navigate('/cart', { state: { cart } });
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+    setSelectedService(null);
+    setDesc('');
+  };
+
   if (loading) {
     return (
       <Container sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -58,6 +104,13 @@ const Services = () => {
 
   return (
     <Container maxWidth="lg">
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 2 }}>
+        <IconButton color="primary" onClick={handleCartClick} size="large">
+          <Badge badgeContent={cart.length} color="secondary">
+            <ShoppingCartIcon fontSize="large" />
+          </Badge>
+        </IconButton>
+      </Box>
       <Typography variant="h3" component="h1" gutterBottom sx={{ my: 4 }}>
         Our Services
       </Typography>
@@ -114,11 +167,46 @@ const Services = () => {
                 <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold', textAlign: 'center' }}>
                   {service.name}
                 </Typography>
+                {!isInCart(service._id) ? (
+                  <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => handleAdd(service)}>
+                    Add
+                  </Button>
+                ) : (
+                  <IconButton color="error" sx={{ mt: 2 }} onClick={() => handleRemove(service._id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                )}
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
+      <Drawer
+        anchor="bottom"
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        PaperProps={{ sx: { borderRadius: '16px 16px 0 0', p: 3 } }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6">Add a description (optional)</Typography>
+          <IconButton onClick={handleDrawerClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <TextField
+          fullWidth
+          variant="outlined"
+          label="Description"
+          value={desc}
+          onChange={e => setDesc(e.target.value)}
+          multiline
+          minRows={2}
+          sx={{ mb: 2 }}
+        />
+        <Button variant="contained" color="primary" onClick={handleSaveDesc} fullWidth>
+          Save
+        </Button>
+      </Drawer>
     </Container>
   );
 };
