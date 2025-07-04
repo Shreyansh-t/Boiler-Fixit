@@ -6,7 +6,9 @@ import Home from './pages/Home.jsx';
 import Services from './pages/Services.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
+import EmailVerification from './pages/EmailVerification.jsx';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import UserContextProvider from './contexts/userContext.jsx';
 import './App.css';
 
 // Create a theme instance
@@ -108,25 +110,21 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="login" element={<Login />} />
-              <Route path="signup" element={<Signup />} />
-              <Route
-                path="services"
-                element={
-                  <ProtectedRoute>
-                    <Services />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <UserContextProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="login" element={<Login />} />
+                <Route path="email-verification" element={<EmailVerification />} />
+                <Route path="signup" element={<Signup />} />
+                <Route path="/services" element={<Services />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </UserContextProvider>
     </ThemeProvider>
   );
 }

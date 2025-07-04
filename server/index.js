@@ -5,7 +5,9 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const userRouter = require("./src/routes/user.routes");
 const otpRouter = require("./src/routes/otp.routes");
+const servicesRouter = require("./src/routes/services.routes");
 const app = express();
+const cookieParser = require('cookie-parser');
 
 // Middleware
 app.use(cors({
@@ -20,11 +22,13 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`, req.body);
   next();
 });
+app.use(cookieParser());
 
 // API Routes
 
 app.use('/user', userRouter);
 app.use('/otp', otpRouter);
+app.use('/services', servicesRouter);
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "../client/build")));
 

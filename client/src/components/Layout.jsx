@@ -36,7 +36,7 @@ const Layout = () => {
               <Button color="inherit" component={RouterLink} to="/login">
                 Login
               </Button>
-              <Button color="inherit" component={RouterLink} to="/signup">
+              <Button color="inherit" component={RouterLink} to="/email-verification">
                 Sign Up
               </Button>
             </>

@@ -2,6 +2,9 @@ const userModel = require("../models/user.model");
 const {validationResult}= require('express-validator')
 const {createUser}= require('../services/createUser.services')
 const OTP = require('../models/otp.model');
+const jwt = require('jsonwebtoken');
+const blackListTokenModel = require('../models/blacklistToken');
+
 
 module.exports.userSignup = async (req, res, next) => {
     const errors = validationResult(req);
@@ -43,6 +46,22 @@ module.exports.userLogin = async (req, res, next) => {
         return res.status(400).json({message: 'Invalid email or password'});
     }
     const token = user.generateAuthToken();
+
+    res.cookie('token', token);
     
     return res.status(200).json({token, user});
+}
+
+module.exports.getUserProfile = async (req, res, next) => {
+    return res.status(200).json({user: req.user});
+}
+
+module.exports.userLogout = async (req, res, next) => {
+    
+    const token = req.cookies.token || req.headers.authorization.split(' ')[1];
+    res.clearCookie('token');
+
+    await blackListTokenModel.create({token});
+
+    return res.status(200).json({message: 'Logged Out'});
 }

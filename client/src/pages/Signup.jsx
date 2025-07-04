@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -15,11 +15,29 @@ import {
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Signup = () => {
-  const { register, handleSubmit, formState: { errors }, watch } = useForm();
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm();
   const { signup, loading, error: authError } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const password = watch('password');
   const [error, setError] = useState('');
+
+  // Get email and OTP from navigation state or localStorage
+  useEffect(() => {
+    const emailFromState = location.state?.email;
+    const emailFromStorage = localStorage.getItem('signupEmail');
+    const otpFromState = location.state?.otp;
+    
+    if (emailFromState) {
+      setValue('email', emailFromState);
+    } else if (emailFromStorage) {
+      setValue('email', emailFromStorage);
+    }
+    
+    if (otpFromState) {
+      setValue('otp', otpFromState);
+    }
+  }, [location.state, setValue]);
 
   const onSubmit = async (data) => {
     try {
@@ -30,6 +48,8 @@ const Signup = () => {
       
       if (result.success) {
         console.log('Signup successful, navigating to home');
+        // Clear stored email
+        localStorage.removeItem('signupEmail');
         navigate('/');
       } else {
         console.error('Signup failed:', result.error);
@@ -83,14 +103,34 @@ const Signup = () => {
             />
             <TextField
               fullWidth
+              label="OTP Code"
+              margin="normal"
+              {...register('otp', {
+                required: 'OTP is required',
+                minLength: {
+                  value: 6,
+                  message: 'OTP must be 6 characters',
+                },
+                maxLength: {
+                  value: 6,
+                  message: 'OTP must be 6 characters',
+                },
+              })}
+              error={!!errors.otp}
+              helperText={errors.otp?.message}
+              disabled={loading}
+              placeholder="Enter 6-digit OTP"
+            />
+            <TextField
+              fullWidth
               label="Password"
               type="password"
               margin="normal"
               {...register('password', {
                 required: 'Password is required',
                 minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
+                  value: 8,
+                  message: 'Password must be at least 8 characters',
                 },
               })}
               error={!!errors.password}
@@ -120,7 +160,7 @@ const Signup = () => {
               sx={{ mt: 3, mb: 2 }}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link

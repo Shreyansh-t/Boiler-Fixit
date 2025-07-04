@@ -11,11 +11,17 @@ import {
   Link,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import axios from 'axios';
+import { useState, useContext } from 'react';
+import {UserDataContext} from '../contexts/userContext'
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { login } = useAuth();
   const navigate = useNavigate();
+  
 
   const onSubmit = async (data) => {
     const result = await login(data);
@@ -24,6 +30,28 @@ const Login = () => {
     }
   };
 
+  const {user, setUser} = useContext(UserDataContext);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    const userData = {
+      email: email,
+      password: password,
+    }
+    const response = await axios.post(`${process.env.REACT_APP_BASE_URL}/user/login`, userData);
+
+    if(response.status === 200){
+      const {token, user} = response.data;
+      setUser(user);
+      localStorage.setItem('token', token);
+      navigate('/services');
+    }else{
+      console.log(response.data.message);
+    }
+    setEmail('');
+    setPassword('');
+  }
+
   return (
     <Container maxWidth="sm">
       <Box sx={{ mt: 8 }}>
@@ -31,34 +59,26 @@ const Login = () => {
           <Typography variant="h4" component="h1" gutterBottom align="center" color="primary">
             Login to BoilerFixIt
           </Typography>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={(e)=>{
+            submitHandler(e);
+        }}>
             <TextField
               fullWidth
               label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               type="email"
               margin="normal"
-              {...register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address',
-                },
-              })}
               error={!!errors.email}
               helperText={errors.email?.message}
             />
             <TextField
               fullWidth
               label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               type="password"
               margin="normal"
-              {...register('password', {
-                required: 'Password is required',
-                minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
-                },
-              })}
               error={!!errors.password}
               helperText={errors.password?.message}
             />
@@ -76,7 +96,7 @@ const Login = () => {
               <Link
                 component="button"
                 variant="body2"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/email-verification')}
                 sx={{ textDecoration: 'none' }}
               >
                 Don't have an account? Sign up

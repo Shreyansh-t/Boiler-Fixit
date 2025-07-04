@@ -5,7 +5,7 @@ import {
   Grid,
   Card,
   CardContent,
-  CardHeader,
+  CardMedia,
   TextField,
   CircularProgress,
   Alert,
@@ -36,8 +36,8 @@ const Services = () => {
 
   const filteredServices = services.filter(
     (service) =>
-      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchQuery.toLowerCase())
+      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (service.description && service.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   if (loading) {
@@ -65,10 +65,11 @@ const Services = () => {
       <TextField
         fullWidth
         variant="outlined"
-        label="Search Services"
+        placeholder="Look up service"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        sx={{ mb: 4 }}
+        sx={{ mb: 4, fontSize: '1.5rem' }}
+        inputProps={{ style: { fontSize: '1.5rem', padding: '20px 14px' } }}
       />
 
       <Grid container spacing={4} alignItems="stretch">
@@ -78,13 +79,14 @@ const Services = () => {
             xs={12}
             sm={6}
             md={4}
-            key={service.id || index}
+            key={service._id || index}
             sx={{ display: 'flex' }}
           >
             <Card
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
+                alignItems: 'center',
                 height: '100%',
                 width: '100%',
                 transition: 'transform 0.2s ease-in-out',
@@ -94,24 +96,24 @@ const Services = () => {
                 },
               }}
             >
-              <CardHeader
-                title={service.title}
-                sx={{
-                  backgroundColor: 'primary.main',
-                  color: 'white',
-                  py: 1.5,
-                  '& .MuiCardHeader-title': { fontSize: '1.25rem', fontWeight: 'bold' },
-                }}
+              <CardMedia
+                component="img"
+                image={service.imgUrl}
+                alt={service.name}
+                sx={{ width: '100%', height: 220, objectFit: 'cover' }}
               />
               <CardContent
                 sx={{
                   flexGrow: 1,
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   p: 2,
                 }}
               >
-                <Typography variant="body1">{service.description}</Typography>
+                <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold', textAlign: 'center' }}>
+                  {service.name}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
