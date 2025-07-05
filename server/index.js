@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const userRouter = require("./src/routes/user.routes");
 const otpRouter = require("./src/routes/otp.routes");
 const servicesRouter = require("./src/routes/services.routes");
+const serviceRequestRouter = require("./src/routes/serviceRequest.routes");
+const paymentRouter = require("./src/routes/payment.routes");
 const app = express();
 const cookieParser = require('cookie-parser');
 
@@ -29,6 +31,8 @@ app.use(cookieParser());
 app.use('/user', userRouter);
 app.use('/otp', otpRouter);
 app.use('/services', servicesRouter);
+app.use('/service-requests', serviceRequestRouter);
+app.use('/payment', paymentRouter);
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "../client/build")));
 

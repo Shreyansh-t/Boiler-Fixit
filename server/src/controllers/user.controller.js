@@ -65,3 +65,69 @@ module.exports.userLogout = async (req, res, next) => {
 
     return res.status(200).json({message: 'Logged Out'});
 }
+
+module.exports.getUserAddresses = async (req, res, next) => {
+    try {
+        const user = await userModel.findById(req.user.id).select('savedAddresses');
+        return res.status(200).json({
+            message: 'Addresses retrieved successfully',
+            addresses: user.savedAddresses || []
+        });
+    } catch (error) {
+        return res.status(500).json({message: 'Failed to retrieve addresses'});
+    }
+}
+
+module.exports.saveUserAddress = async (req, res, next) => {
+    try {
+        const { label, street, city, state, zipCode, country, coordinates, isDefault } = req.body;
+        
+        if (!label || !street || !city || !state || !zipCode) {
+            return res.status(400).json({message: 'All address fields are required'});
+        }
+
+        const user = await userModel.findById(req.user.id);
+        
+        // If this is set as default, unset other defaults
+        if (isDefault) {
+            user.savedAddresses.forEach(addr => {
+                addr.isDefault = false;
+            });
+        }
+
+        // Add new address
+        user.savedAddresses.push({
+            label,
+            street,
+            city,
+            state,
+            zipCode,
+            country: country || 'USA',
+            coordinates,
+            isDefault: isDefault || false
+        });
+
+        await user.save();
+
+        return res.status(201).json({
+            message: 'Address saved successfully',
+            address: user.savedAddresses[user.savedAddresses.length - 1]
+        });
+    } catch (error) {
+        return res.status(500).json({message: 'Failed to save address'});
+    }
+}
+
+module.exports.deleteUserAddress = async (req, res, next) => {
+    try {
+        const { addressId } = req.params;
+        const user = await userModel.findById(req.user.id);
+        
+        user.savedAddresses.id(addressId).remove();
+        await user.save();
+
+        return res.status(200).json({message: 'Address deleted successfully'});
+    } catch (error) {
+        return res.status(500).json({message: 'Failed to delete address'});
+    }
+}

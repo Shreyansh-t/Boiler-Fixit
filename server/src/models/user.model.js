@@ -19,6 +19,45 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  savedAddresses: [{
+    label: {
+      type: String,
+      required: true // e.g., "Home", "Work", "Apartment"
+    },
+    street: {
+      type: String,
+      required: true
+    },
+    city: {
+      type: String,
+      required: true
+    },
+    state: {
+      type: String,
+      required: true
+    },
+    zipCode: {
+      type: String,
+      required: true
+    },
+    country: {
+      type: String,
+      required: true,
+      default: 'USA'
+    },
+    coordinates: {
+      latitude: Number,
+      longitude: Number
+    },
+    isDefault: {
+      type: Boolean,
+      default: false
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   createdAt: {
     type: Date,
     default: Date.now

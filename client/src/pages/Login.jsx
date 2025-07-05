@@ -1,5 +1,4 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -9,48 +8,29 @@ import {
   Button,
   Box,
   Link,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import axios from 'axios';
-import { useState, useContext } from 'react';
-import {UserDataContext} from '../contexts/userContext'
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  const { login } = useAuth();
+  const [error, setError] = useState('');
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
-  
 
-  const onSubmit = async (data) => {
-    const result = await login(data);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    const result = await login({ email, password });
     if (result.success) {
       navigate('/');
+    } else {
+      setError(result.error || 'Login failed');
     }
   };
-
-  const {user, setUser} = useContext(UserDataContext);
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    const userData = {
-      email: email,
-      password: password,
-    }
-    const response = await axios.post(`${process.env.REACT_APP_BASE_URL}/user/login`, userData);
-
-    if(response.status === 200){
-      const {token, user} = response.data;
-      setUser(user);
-      localStorage.setItem('token', token);
-      navigate('/services');
-    }else{
-      console.log(response.data.message);
-    }
-    setEmail('');
-    setPassword('');
-  }
 
   return (
     <Container maxWidth="sm">
@@ -59,9 +39,12 @@ const Login = () => {
           <Typography variant="h4" component="h1" gutterBottom align="center" color="primary">
             Login to BoilerFixIt
           </Typography>
-          <form onSubmit={(e)=>{
-            submitHandler(e);
-        }}>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
               label="Email"
@@ -69,8 +52,8 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               margin="normal"
-              error={!!errors.email}
-              helperText={errors.email?.message}
+              required
+              disabled={loading}
             />
             <TextField
               fullWidth
@@ -79,8 +62,8 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               margin="normal"
-              error={!!errors.password}
-              helperText={errors.password?.message}
+              required
+              disabled={loading}
             />
             <Button
               type="submit"
@@ -89,17 +72,23 @@ const Login = () => {
               color="primary"
               size="large"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
-              Login
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
             </Button>
             <Box sx={{ textAlign: 'center' }}>
               <Link
                 component="button"
+                type="button"
                 variant="body2"
-                onClick={() => navigate('/email-verification')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/email-verification');
+                }}
                 sx={{ textDecoration: 'none' }}
+                disabled={loading}
               >
-                Don't have an account? Sign up
+                Don't have an account? Create account
               </Link>
             </Box>
           </form>

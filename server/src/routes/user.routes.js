@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {body}= require('express-validator')
-const {userSignup, userLogin, getUserProfile, userLogout}= require('../controllers/user.controller')
+const {userSignup, userLogin, getUserProfile, userLogout, getUserAddresses, saveUserAddress, deleteUserAddress}= require('../controllers/user.controller')
 const {authUser}= require('../middlewares/auth.middleware')
 
 router.post("/signup",[
@@ -20,5 +20,18 @@ router.post("/login", [
 router.get("/profile", authUser, getUserProfile);
 
 router.get("/logout", authUser, userLogout);
+
+// Address management routes
+router.get("/addresses", authUser, getUserAddresses);
+
+router.post("/addresses", [
+    body('label').notEmpty().withMessage('Address label is required'),
+    body('street').notEmpty().withMessage('Street address is required'),
+    body('city').notEmpty().withMessage('City is required'),
+    body('state').notEmpty().withMessage('State is required'),
+    body('zipCode').notEmpty().withMessage('ZIP code is required')
+], authUser, saveUserAddress);
+
+router.delete("/addresses/:addressId", authUser, deleteUserAddress);
 
 module.exports = router;

@@ -7,10 +7,12 @@ import Services from './pages/Services.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
 import EmailVerification from './pages/EmailVerification.jsx';
+import Profile from './pages/Profile.jsx';
 import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
-import UserContextProvider from './contexts/userContext.jsx';
 import ServiceDetail from './pages/ServiceDetail.jsx';
 import Cart from './pages/Cart.jsx';
+import PaymentPage from './pages/PaymentPage.jsx';
+import PaymentSuccess from './pages/PaymentSuccess.jsx';
 import './App.css';
 
 // Create a theme instance
@@ -112,23 +114,31 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <UserContextProvider>
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="login" element={<Login />} />
-                <Route path="email-verification" element={<EmailVerification />} />
-                <Route path="signup" element={<Signup />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/services/:id" element={<ServiceDetail />} />
-                <Route path="/cart" element={<Cart />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </UserContextProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="login" element={<Login />} />
+              <Route path="email-verification" element={<EmailVerification />} />
+              <Route path="signup" element={<Signup />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/services/:id" element={<ServiceDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/payment" element={<PaymentPage />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

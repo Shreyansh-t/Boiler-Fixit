@@ -81,6 +81,9 @@ const Services = () => {
   };
 
   const handleDrawerClose = () => {
+    if (selectedService && !isInCart(selectedService._id)) {
+      setCart([...cart, { ...selectedService, desc }]);
+    }
     setDrawerOpen(false);
     setSelectedService(null);
     setDesc('');
